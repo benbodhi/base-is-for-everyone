@@ -14,10 +14,16 @@
     <meta name="theme-color" content="#0052ff">
 </head>
 <body>
-    <div id="base-message"></div>
-    <!-- <div id="link-container">
-        <a href="https://zora.co/" id="bottom-link">Mint This</a>
-    </div> -->
+    <div id="background" aria-hidden="true"></div>
+    <main id="stage">
+        <p id="base-message">
+            <span id="base-word">Base</span>
+            <span id="suffix-slot" aria-live="polite">
+                <span class="suffix-layer is-visible" dir="auto"></span>
+                <span class="suffix-layer" dir="auto"></span>
+            </span>
+        </p>
+    </main>
     <script src="script.js"></script>
 </body>
 </html>

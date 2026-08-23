@@ -1,132 +1,290 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const phrases = [
-        "Base is for everyone", // English
-        "Base es para todos", // Spanish
-        "Base est pour tout le monde", // French
-        "Base ist für alle", // German
-        "Base 是为所有人准备的", // Chinese (Simplified)
-        "Base は皆のためです", // Japanese
-        "Base 는 모두를 위한 것입니다", // Korean
-        "Base jest dla wszystkich", // Polish
-        "Base для всех", // Russian
-        "Base é para todos", // Portuguese
-        "Base è per tutti", // Italian
-        "Base للجميع", // Arabic
-        "Base je za svakoga", // Croatian
-        "Base is voor iedereen", // Dutch
-        "Base είναι για όλους", // Greek
-        "Base सबके लिए है", // Hindi
-        "Base për të gjithë", // Albanian
-        "Base הוא לכולם", // Hebrew
-        "Base для всіх", // Ukrainian
-        "Base је за све", // Serbian
-        "Base dành cho mọi người", // Vietnamese
-        "Base je pro všechny", // Czech
-        "Base pentru toată lumea", // Romanian
-        "Base je za vse", // Slovenian
-        "Base hər kəs üçündür", // Azerbaijani
-        "Base ni kwa kila mtu", // Swahili
-        "Base барои ҳама аст", // Tajik
-        "Base е за сите", // Macedonian
-        "Base yra visiems", // Lithuanian
-        "Base ir visiem", // Latvian
-        "Base ke bakeng sa bohle", // Sesotho
-        "Base สำหรับทุกคน", // Thai
-        "Base untuk semua orang", // Indonesian
-        "Base é para todos", // Galician
-        "Base je za sve", // Bosnian
-        "Base mindenkié", // Hungarian
-        "Base kõigi jaoks", // Estonian
-        "Base er for alle", // Danish
-        "Base fyrir alla", // Icelandic
-        "Base semua", // Malay
-        "Base pro každého", // Slovak
-        "Base mo ĉiuj", // Esperanto
-        "Base هر", // Persian
-        "Base mỗi người", // Vietnamese (Latin)
-        "Base tansi", // Cree
-        "Base tout moun", // Haitian Creole
-        "Base hver", // Norwegian
-        "Base cada pessoa", // Portuguese (Brazilian)
-        "Base mỗi người", // Vietnamese
-        "Base mindenki számára", // Hungarian (Latin)
-        "Base każda osoba", // Polish (Latin)
-        "Base każdého", // Czech (Latin)
-        "Base varje person", // Swedish
-        "Base mindenki", // Hungarian (Latin)
-        "Base هر کس", // Persian (Latin)
-        "Base chiếu mọi người", // Vietnamese (Latin)
-        "Base tất cả", // Vietnamese
-        "Base kõikidele", // Estonian
-        "Base hər kəs üçün", // Azerbaijani (Latin)
+    const translations = [
+        "is for everyone",
+        "es para todos",
+        "est pour tout le monde",
+        "ist für alle",
+        "是为所有人准备的",
+        "は皆のためです",
+        "는 모두를 위한 것입니다",
+        "jest dla wszystkich",
+        "для всех",
+        "é para todos",
+        "è per tutti",
+        "للجميع",
+        "is voor iedereen",
+        "είναι για όλους",
+        "सबके लिए है",
+        "është për të gjithë",
+        "הוא לכולם",
+        "для всіх",
+        "је за све",
+        "dành cho mọi người",
+        "je pro všechny",
+        "este pentru toată lumea",
+        "je za vse",
+        "hər kəs üçündür",
+        "ni kwa kila mtu",
+        "барои ҳама аст",
+        "е за сите",
+        "yra visiems",
+        "ir visiem",
+        "สำหรับทุกคน",
+        "untuk semua orang",
+        "je za sve",
+        "mindenkié",
+        "on kõigi jaoks",
+        "er for alle",
+        "er fyrir alla",
+        "je pre každého",
+        "estas por ĉiuj",
+        "برای همه است",
+        "para sa lahat",
+        "är för alla",
+        "on kaikille",
+        "herkes içindir",
+        "je za svakoga",
+        "għal kulħadd",
+        "est per a tothom",
+        "thuộc về mọi người",
+        "для усіх",
+        "е за всички",
+        "არის ყველასთვის",
+        "բոլորի համար է",
+        "барлығы үшін",
+        "hamma uchun",
+        "бүх хүнд",
+        "is vir almal",
+        "est omnibus",
+        "est destiné à tous",
+        "ist für jeden",
+        "geldt voor iedereen",
+        "سب کے لیے ہے",
+        "সবার জন্য",
+        "அனைவருக்கும்",
+        "అందరికీ",
+        "सर्वांसाठी आहे",
+        "દરેક માટે છે",
+        "ಎಲ್ಲರಿಗೂ",
+        "എല്ലാവർക്കും",
+        "ਸਭ ਲਈ ਹੈ",
+        "සැමටම",
+        "សម្រាប់គ្រប់គ្នា",
+        "ສຳລັບທຸກຄົນ",
+        "အားလုံးအတွက်",
+        "je za vsakogar",
+        "е за всеки",
+        "для каждого",
+        "é per a tothom",
+        "está para todos",
+        "on kaikkien",
+        "är till för alla",
+        "do gach duine é",
+        "tha e airson a h-uile duine",
+        "evit an holl eo",
+        "ar gyfer pawb yw",
+        "guztiontzako da",
+        "ke bakeng sa bohle",
+        "kwa wote",
+        "fun gbogbo eniyan",
+        "mo e tagata uma",
+        "para ki te katoa",
+        "cho mọi người",
+        "sa lahat",
+        "para kaninuman",
+        "bagi semua",
+        "ha kila mtu",
+        "kwa kila mmoja",
+        "binhi ya bantu nyonso",
+        "ni ya kila mtu",
+        "di na obi ọ bụla",
+        "ye bɛɛ ye",
+        "di na mɔgɔ bɛɛ ye",
+        "di maa mɔ ni nyinaa",
+        "kwa watu wote",
+        "no te mea e",
+        "para todos os",
+        "está para toda a gente",
+        "é para toda a gente",
+        "está para toda la gente",
+        "適合所有人",
+        "皆のものです",
+        "모두를 위한",
+        "jest dla każdego",
+        "для всех нас",
+        "для кожного",
+        "для кожного з нас",
+        "pentru toți",
+        "pentru toată lumea",
+        "za sve",
+        "za svakoga",
+        "za vsakogar",
+        "pro každého",
+        "pro všechny",
+        "pro vsechny",
+        "pre každého",
+        "pre všetkých",
+        "mindenki számára",
     ];
 
-    let currentIndex = 0;
     const messageElement = document.getElementById('base-message');
-    let angle = 0;
-    let activePhrase = phrases[0];
+    const suffixSlot = document.getElementById('suffix-slot');
+    const suffixLayers = Array.from(suffixSlot.querySelectorAll('.suffix-layer'));
+    const stageElement = document.getElementById('stage');
+    const measureCanvas = document.createElement('canvas');
+    const measureContext = measureCanvas.getContext('2d');
+
+    const fontFamily = 'Montserrat, sans-serif';
+    const fontWeight = 500;
+    const lineHeight = 1.2;
+    const heightBudget = 0.11;
+    const widthBudget = 0.88;
+    const holdDuration = 3200;
+    const transitionDuration = 900;
+
+    let visibleLayer = 0;
+    let currentSuffix = translations[0];
+    let deck = [];
     let resizeFrame = null;
+    let cycleTimer = null;
 
     function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+        const copy = array.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function refillDeck(exclude) {
+        deck = shuffle(translations);
+        if (deck.length > 1 && deck[0] === exclude) {
+            [deck[0], deck[1]] = [deck[1], deck[0]];
         }
     }
 
-    function createPhrasesArray() {
-        const shuffledPhrases = phrases.slice(1);
-        shuffle(shuffledPhrases);
+    function nextSuffix(exclude) {
+        if (deck.length === 0) {
+            refillDeck(exclude);
+        }
+        return deck.pop();
+    }
 
-        const newPhrases = [];
-        for (let i = 0; i < shuffledPhrases.length; i++) {
-            if ((i + 1) % 10 === 0) {
-                newPhrases.push(phrases[0]);
+    function getBounds() {
+        const rect = stageElement.getBoundingClientRect();
+        return {
+            width: rect.width * widthBudget,
+            height: rect.height * heightBudget,
+        };
+    }
+
+    function measureText(text, fontSize) {
+        measureContext.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        const metrics = measureContext.measureText(text);
+        const width = metrics.width;
+        const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.78;
+        const descent = metrics.actualBoundingBoxDescent || fontSize * 0.22;
+        const height = (ascent + descent) * lineHeight;
+
+        return { width, height };
+    }
+
+    function widestPhrase(fontSize) {
+        let widest = `Base ${translations[0]}`;
+        let maxWidth = measureText(widest, fontSize).width;
+
+        for (const suffix of translations) {
+            const candidate = `Base ${suffix}`;
+            const width = measureText(candidate, fontSize).width;
+            if (width > maxWidth) {
+                maxWidth = width;
+                widest = candidate;
             }
-            newPhrases.push(shuffledPhrases[i]);
         }
-        return newPhrases;
+
+        return widest;
     }
 
-    function fitMessage(phrase) {
-        const styles = getComputedStyle(messageElement);
-        const maxWidth = messageElement.clientWidth;
-        const padding = parseFloat(styles.getPropertyValue('--message-padding')) || 0;
-        const bodyStyles = getComputedStyle(document.body);
-        const verticalInset =
-            (parseFloat(bodyStyles.paddingTop) || 0) +
-            (parseFloat(bodyStyles.paddingBottom) || 0);
-        const maxHeight = window.innerHeight - verticalInset - (padding * 2);
-
+    function fitMessage() {
+        const { width: maxWidth, height: maxHeight } = getBounds();
         if (maxWidth <= 0 || maxHeight <= 0) {
             return;
         }
 
-        const previousText = messageElement.textContent;
-        messageElement.textContent = phrase;
-
-        let low = 1;
-        let high = Math.max(
-            Math.floor(maxHeight * 0.92),
-            Math.floor(maxWidth / Math.max(phrase.length * 0.3, 1))
-        );
+        const sample = widestPhrase(100);
+        let low = 8;
+        let high = Math.floor(Math.min(maxHeight / lineHeight, maxWidth));
 
         while (low < high) {
             const mid = Math.ceil((low + high) / 2);
-            messageElement.style.fontSize = `${mid}px`;
+            const { width, height } = measureText(sample, mid);
 
-            const fitsWidth = messageElement.scrollWidth <= maxWidth;
-            const fitsHeight = messageElement.scrollHeight <= maxHeight * 0.92;
-
-            if (fitsWidth && fitsHeight) {
+            if (width <= maxWidth && height <= maxHeight) {
                 low = mid;
             } else {
                 high = mid - 1;
             }
         }
 
-        messageElement.style.fontSize = `${Math.max(low, 1)}px`;
-        messageElement.textContent = previousText;
+        messageElement.style.fontSize = `${Math.max(low, 12)}px`;
+        updateSlotWidth(currentSuffix);
+    }
+
+    function updateSlotWidth(suffix) {
+        const fontSize = parseFloat(getComputedStyle(messageElement).fontSize) || 16;
+        const width = measureText(suffix, fontSize).width;
+        suffixSlot.style.width = `${Math.ceil(width)}px`;
+    }
+
+    function setLayerText(layerIndex, suffix) {
+        suffixLayers[layerIndex].textContent = suffix;
+    }
+
+    function resetLayerClasses() {
+        suffixLayers.forEach((layer) => {
+            layer.className = 'suffix-layer';
+        });
+    }
+
+    function transitionTo(nextText) {
+        const incomingIndex = visibleLayer ^ 1;
+        const outgoingIndex = visibleLayer;
+
+        setLayerText(incomingIndex, nextText);
+
+        const fontSize = parseFloat(getComputedStyle(messageElement).fontSize) || 16;
+        const nextWidth = measureText(nextText, fontSize).width;
+        const currentWidth = measureText(currentSuffix, fontSize).width;
+        suffixSlot.style.width = `${Math.ceil(Math.max(nextWidth, currentWidth))}px`;
+
+        resetLayerClasses();
+        suffixLayers[outgoingIndex].classList.add('is-visible', 'is-leaving');
+        suffixLayers[incomingIndex].classList.add('is-entering');
+
+        requestAnimationFrame(() => {
+            suffixLayers[incomingIndex].classList.add('is-visible');
+        });
+
+        window.setTimeout(() => {
+            resetLayerClasses();
+            suffixLayers[incomingIndex].classList.add('is-visible');
+            setLayerText(outgoingIndex, '');
+            visibleLayer = incomingIndex;
+            currentSuffix = nextText;
+            updateSlotWidth(currentSuffix);
+        }, transitionDuration);
+    }
+
+    function scheduleCycle() {
+        if (cycleTimer !== null) {
+            clearTimeout(cycleTimer);
+        }
+
+        cycleTimer = window.setTimeout(() => {
+            transitionTo(nextSuffix(currentSuffix));
+            scheduleCycle();
+        }, holdDuration + transitionDuration);
     }
 
     function scheduleFit() {
@@ -136,48 +294,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resizeFrame = requestAnimationFrame(() => {
             resizeFrame = null;
-            fitMessage(activePhrase);
-        });
-    }
-
-    function updateBackground() {
-        angle = (angle + 0.1) % 360;
-        document.body.style.background = `conic-gradient(from ${angle}deg at 50% 50%, #001cf5, #4874f7, #001cf5)`;
-        requestAnimationFrame(updateBackground);
-    }
-
-    function writePhrase(phrase, callback) {
-        activePhrase = phrase;
-        fitMessage(phrase);
-
-        let i = 0;
-        messageElement.textContent = '';
-        const writeInterval = setInterval(() => {
-            if (i < phrase.length) {
-                messageElement.textContent = phrase.slice(0, i + 1);
-                i++;
-            } else {
-                clearInterval(writeInterval);
-                setTimeout(callback, 2000);
-            }
-        }, 69);
-    }
-
-    function cyclePhrases(newPhrases) {
-        writePhrase(newPhrases[currentIndex], () => {
-            currentIndex = (currentIndex + 1) % newPhrases.length;
-            cyclePhrases(newPhrases);
+            fitMessage();
         });
     }
 
     window.addEventListener('resize', scheduleFit);
     window.addEventListener('orientationchange', scheduleFit);
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', scheduleFit);
+        window.visualViewport.addEventListener('scroll', scheduleFit);
     }
 
-    const newPhrases = createPhrasesArray();
-    newPhrases.unshift(phrases[0]);
-    updateBackground();
-    cyclePhrases(newPhrases);
+    refillDeck(null);
+    currentSuffix = nextSuffix(null);
+    setLayerText(visibleLayer, currentSuffix);
+    suffixLayers[visibleLayer].classList.add('is-visible');
+    fitMessage();
+    scheduleCycle();
 });
