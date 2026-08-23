@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "Base mỗi người", // Vietnamese
         "Base mindenki számára", // Hungarian (Latin)
         "Base każda osoba", // Polish (Latin)
-        "Base každého", // Czech (Latin)
+        "Base każdého", // Czech (Latin)
         "Base varje person", // Swedish
         "Base mindenki", // Hungarian (Latin)
         "Base هر کس", // Persian (Latin)
@@ -64,8 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentIndex = 0;
     const messageElement = document.getElementById('base-message');
     let angle = 0;
+    let activePhrase = phrases[0];
+    let resizeFrame = null;
 
-    // Function to shuffle an array
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -73,19 +74,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Create a new array with English at the start and every 11th position
     function createPhrasesArray() {
-        const shuffledPhrases = phrases.slice(1); // Exclude the English phrase
+        const shuffledPhrases = phrases.slice(1);
         shuffle(shuffledPhrases);
 
         const newPhrases = [];
         for (let i = 0; i < shuffledPhrases.length; i++) {
             if ((i + 1) % 10 === 0) {
-                newPhrases.push(phrases[0]); // Add English every 11th iteration
+                newPhrases.push(phrases[0]);
             }
             newPhrases.push(shuffledPhrases[i]);
         }
         return newPhrases;
+    }
+
+    function fitMessage(phrase) {
+        const styles = getComputedStyle(messageElement);
+        const maxWidth = messageElement.clientWidth;
+        const padding = parseFloat(styles.getPropertyValue('--message-padding')) || 0;
+        const bodyStyles = getComputedStyle(document.body);
+        const verticalInset =
+            (parseFloat(bodyStyles.paddingTop) || 0) +
+            (parseFloat(bodyStyles.paddingBottom) || 0);
+        const maxHeight = window.innerHeight - verticalInset - (padding * 2);
+
+        if (maxWidth <= 0 || maxHeight <= 0) {
+            return;
+        }
+
+        const previousText = messageElement.textContent;
+        messageElement.textContent = phrase;
+
+        let low = 1;
+        let high = Math.max(
+            Math.floor(maxHeight * 0.92),
+            Math.floor(maxWidth / Math.max(phrase.length * 0.3, 1))
+        );
+
+        while (low < high) {
+            const mid = Math.ceil((low + high) / 2);
+            messageElement.style.fontSize = `${mid}px`;
+
+            const fitsWidth = messageElement.scrollWidth <= maxWidth;
+            const fitsHeight = messageElement.scrollHeight <= maxHeight * 0.92;
+
+            if (fitsWidth && fitsHeight) {
+                low = mid;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        messageElement.style.fontSize = `${Math.max(low, 1)}px`;
+        messageElement.textContent = previousText;
+    }
+
+    function scheduleFit() {
+        if (resizeFrame !== null) {
+            cancelAnimationFrame(resizeFrame);
+        }
+
+        resizeFrame = requestAnimationFrame(() => {
+            resizeFrame = null;
+            fitMessage(activePhrase);
+        });
     }
 
     function updateBackground() {
@@ -95,17 +147,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function writePhrase(phrase, callback) {
+        activePhrase = phrase;
+        fitMessage(phrase);
+
         let i = 0;
-        messageElement.innerHTML = '';
+        messageElement.textContent = '';
         const writeInterval = setInterval(() => {
             if (i < phrase.length) {
-                messageElement.innerHTML = phrase.slice(0, i + 1);
+                messageElement.textContent = phrase.slice(0, i + 1);
                 i++;
             } else {
                 clearInterval(writeInterval);
-                setTimeout(callback, 2000); // Wait before showing the next phrase
+                setTimeout(callback, 2000);
             }
-        }, 69); // Writing effect speed
+        }, 69);
     }
 
     function cyclePhrases(newPhrases) {
@@ -115,8 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    window.addEventListener('resize', scheduleFit);
+    window.addEventListener('orientationchange', scheduleFit);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleFit);
+    }
+
     const newPhrases = createPhrasesArray();
-    newPhrases.unshift(phrases[0]); // Ensure the first phrase is always English
+    newPhrases.unshift(phrases[0]);
     updateBackground();
     cyclePhrases(newPhrases);
 });
