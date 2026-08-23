@@ -74,11 +74,12 @@ body {
 }
 
 #base-message {
-    display: flex;
+    display: inline-flex;
     align-items: baseline;
     justify-content: center;
     max-width: 100%;
     margin: 0;
+    white-space: nowrap;
     line-height: 1.2;
     letter-spacing: -0.015em;
     -webkit-font-smoothing: antialiased;
@@ -90,51 +91,11 @@ body {
     flex: 0 0 auto;
 }
 
-#suffix-slot {
-    position: relative;
+#base-suffix {
     display: inline-block;
-    flex: 0 1 auto;
-    min-width: 0;
-    margin-left: 0.28em;
-    transition: width 900ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.suffix-layer {
-    display: block;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translateY(0.35em);
-    transition:
-        opacity 900ms cubic-bezier(0.4, 0, 0.2, 1),
-        transform 900ms cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-}
-
-.suffix-layer.is-visible {
-    position: relative;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.suffix-layer.is-entering {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    transform: translateY(0.35em);
-}
-
-.suffix-layer.is-entering.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.suffix-layer.is-visible.is-leaving {
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    transform: translateY(-0.35em);
+    flex: 0 0 auto;
+    min-width: var(--suffix-width, 0);
+    text-align: left;
 }
 
 #link-container {

@@ -121,15 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
         "za vsakogar",
         "pro každého",
         "pro všechny",
-        "pro vsechny",
         "pre každého",
         "pre všetkých",
         "mindenki számára",
     ];
 
     const messageElement = document.getElementById('base-message');
-    const suffixSlot = document.getElementById('suffix-slot');
-    const suffixLayers = Array.from(suffixSlot.querySelectorAll('.suffix-layer'));
+    const suffixElement = document.getElementById('base-suffix');
     const stageElement = document.getElementById('stage');
     const measureCanvas = document.createElement('canvas');
     const measureContext = measureCanvas.getContext('2d');
@@ -139,14 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const lineHeight = 1.2;
     const heightBudget = 0.11;
     const widthBudget = 0.88;
-    const holdDuration = 3200;
-    const transitionDuration = 900;
+    const charDelay = 69;
+    const holdDuration = 2000;
+    const basePrefix = 'Base ';
 
-    let visibleLayer = 0;
-    let currentSuffix = translations[0];
     let deck = [];
+    let currentSuffix = '';
+    let lockedFontSize = null;
+    let lockedSuffixWidth = null;
     let resizeFrame = null;
-    let cycleTimer = null;
+    let typeFrame = null;
+    let cycling = false;
 
     function shuffle(array) {
         const copy = array.slice();
@@ -191,11 +192,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function widestPhrase(fontSize) {
-        let widest = `Base ${translations[0]}`;
+        let widest = `${basePrefix}${translations[0]}`;
         let maxWidth = measureText(widest, fontSize).width;
 
         for (const suffix of translations) {
-            const candidate = `Base ${suffix}`;
+            const candidate = `${basePrefix}${suffix}`;
             const width = measureText(candidate, fontSize).width;
             if (width > maxWidth) {
                 maxWidth = width;
@@ -206,7 +207,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return widest;
     }
 
-    function fitMessage() {
+    function widestSuffix(fontSize) {
+        let widest = translations[0];
+        let maxWidth = measureText(widest, fontSize).width;
+
+        for (const suffix of translations) {
+            const width = measureText(suffix, fontSize).width;
+            if (width > maxWidth) {
+                maxWidth = width;
+                widest = suffix;
+            }
+        }
+
+        return { suffix: widest, width: maxWidth };
+    }
+
+    function applyLockedLayout() {
+        if (lockedFontSize === null || lockedSuffixWidth === null) {
+            return;
+        }
+
+        messageElement.style.fontSize = `${lockedFontSize}px`;
+        suffixElement.style.setProperty('--suffix-width', `${Math.ceil(lockedSuffixWidth)}px`);
+    }
+
+    function lockLayout() {
         const { width: maxWidth, height: maxHeight } = getBounds();
         if (maxWidth <= 0 || maxHeight <= 0) {
             return;
@@ -227,89 +252,85 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        messageElement.style.fontSize = `${Math.max(low, 12)}px`;
-        updateSlotWidth(currentSuffix);
+        lockedFontSize = Math.max(low, 12);
+        lockedSuffixWidth = widestSuffix(lockedFontSize).width;
+        applyLockedLayout();
     }
 
-    function updateSlotWidth(suffix) {
-        const fontSize = parseFloat(getComputedStyle(messageElement).fontSize) || 16;
-        const width = measureText(suffix, fontSize).width;
-        suffixSlot.style.width = `${Math.ceil(width)}px`;
-    }
-
-    function setLayerText(layerIndex, suffix) {
-        suffixLayers[layerIndex].textContent = suffix;
-    }
-
-    function resetLayerClasses() {
-        suffixLayers.forEach((layer) => {
-            layer.className = 'suffix-layer';
-        });
-    }
-
-    function transitionTo(nextText) {
-        const incomingIndex = visibleLayer ^ 1;
-        const outgoingIndex = visibleLayer;
-
-        setLayerText(incomingIndex, nextText);
-
-        const fontSize = parseFloat(getComputedStyle(messageElement).fontSize) || 16;
-        const nextWidth = measureText(nextText, fontSize).width;
-        const currentWidth = measureText(currentSuffix, fontSize).width;
-        suffixSlot.style.width = `${Math.ceil(Math.max(nextWidth, currentWidth))}px`;
-
-        resetLayerClasses();
-        suffixLayers[outgoingIndex].classList.add('is-visible', 'is-leaving');
-        suffixLayers[incomingIndex].classList.add('is-entering');
-
-        requestAnimationFrame(() => {
-            suffixLayers[incomingIndex].classList.add('is-visible');
-        });
-
-        window.setTimeout(() => {
-            resetLayerClasses();
-            suffixLayers[incomingIndex].classList.add('is-visible');
-            setLayerText(outgoingIndex, '');
-            visibleLayer = incomingIndex;
-            currentSuffix = nextText;
-            updateSlotWidth(currentSuffix);
-        }, transitionDuration);
-    }
-
-    function scheduleCycle() {
-        if (cycleTimer !== null) {
-            clearTimeout(cycleTimer);
-        }
-
-        cycleTimer = window.setTimeout(() => {
-            transitionTo(nextSuffix(currentSuffix));
-            scheduleCycle();
-        }, holdDuration + transitionDuration);
-    }
-
-    function scheduleFit() {
+    function scheduleLayoutLock() {
         if (resizeFrame !== null) {
             cancelAnimationFrame(resizeFrame);
         }
 
         resizeFrame = requestAnimationFrame(() => {
             resizeFrame = null;
-            fitMessage();
+            lockLayout();
         });
     }
 
-    window.addEventListener('resize', scheduleFit);
-    window.addEventListener('orientationchange', scheduleFit);
-
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', scheduleFit);
-        window.visualViewport.addEventListener('scroll', scheduleFit);
+    function stopTyping() {
+        if (typeFrame !== null) {
+            cancelAnimationFrame(typeFrame);
+            typeFrame = null;
+        }
     }
 
-    refillDeck(null);
-    currentSuffix = nextSuffix(null);
-    setLayerText(visibleLayer, currentSuffix);
-    suffixLayers[visibleLayer].classList.add('is-visible');
-    fitMessage();
-    scheduleCycle();
+    function typeSuffix(suffix, onComplete) {
+        stopTyping();
+
+        let index = 0;
+        let lastTime = 0;
+        suffixElement.textContent = '';
+
+        function step(timestamp) {
+            if (!lastTime) {
+                lastTime = timestamp;
+            }
+
+            if (timestamp - lastTime >= charDelay) {
+                index += 1;
+                lastTime = timestamp;
+                suffixElement.textContent = suffix.slice(0, index);
+            }
+
+            if (index < suffix.length) {
+                typeFrame = requestAnimationFrame(step);
+                return;
+            }
+
+            typeFrame = null;
+            onComplete();
+        }
+
+        typeFrame = requestAnimationFrame(step);
+    }
+
+    function cycle() {
+        if (cycling) {
+            return;
+        }
+        cycling = true;
+
+        const run = () => {
+            currentSuffix = nextSuffix(currentSuffix);
+            typeSuffix(currentSuffix, () => {
+                window.setTimeout(() => {
+                    run();
+                }, holdDuration);
+            });
+        };
+
+        run();
+    }
+
+    window.addEventListener('resize', scheduleLayoutLock);
+    window.addEventListener('orientationchange', scheduleLayoutLock);
+
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', scheduleLayoutLock);
+        window.visualViewport.addEventListener('scroll', scheduleLayoutLock);
+    }
+
+    lockLayout();
+    cycle();
 });
