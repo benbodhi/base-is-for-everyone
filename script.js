@@ -1,71 +1,80 @@
 document.addEventListener('DOMContentLoaded', () => {
     const phrases = [
-        "Base is for everyone", // English
-        "Base es para todos", // Spanish
-        "Base est pour tout le monde", // French
-        "Base ist für alle", // German
-        "Base 是为所有人准备的", // Chinese (Simplified)
-        "Base は皆のためです", // Japanese
-        "Base 는 모두를 위한 것입니다", // Korean
-        "Base jest dla wszystkich", // Polish
-        "Base для всех", // Russian
-        "Base é para todos", // Portuguese
-        "Base è per tutti", // Italian
-        "Base للجميع", // Arabic
-        "Base je za svakoga", // Croatian
-        "Base is voor iedereen", // Dutch
-        "Base είναι για όλους", // Greek
-        "Base सबके लिए है", // Hindi
-        "Base për të gjithë", // Albanian
-        "Base הוא לכולם", // Hebrew
-        "Base для всіх", // Ukrainian
-        "Base је за све", // Serbian
-        "Base dành cho mọi người", // Vietnamese
-        "Base je pro všechny", // Czech
-        "Base pentru toată lumea", // Romanian
-        "Base je za vse", // Slovenian
-        "Base hər kəs üçündür", // Azerbaijani
-        "Base ni kwa kila mtu", // Swahili
-        "Base барои ҳама аст", // Tajik
-        "Base е за сите", // Macedonian
-        "Base yra visiems", // Lithuanian
-        "Base ir visiem", // Latvian
-        "Base ke bakeng sa bohle", // Sesotho
-        "Base สำหรับทุกคน", // Thai
-        "Base untuk semua orang", // Indonesian
-        "Base é para todos", // Galician
-        "Base je za sve", // Bosnian
-        "Base mindenkié", // Hungarian
-        "Base kõigi jaoks", // Estonian
-        "Base er for alle", // Danish
-        "Base fyrir alla", // Icelandic
-        "Base semua", // Malay
-        "Base pro každého", // Slovak
-        "Base mo ĉiuj", // Esperanto
-        "Base هر", // Persian
-        "Base mỗi người", // Vietnamese (Latin)
-        "Base tansi", // Cree
-        "Base tout moun", // Haitian Creole
-        "Base hver", // Norwegian
-        "Base cada pessoa", // Portuguese (Brazilian)
-        "Base mỗi người", // Vietnamese
-        "Base mindenki számára", // Hungarian (Latin)
-        "Base każda osoba", // Polish (Latin)
-        "Base każdého", // Czech (Latin)
-        "Base varje person", // Swedish
-        "Base mindenki", // Hungarian (Latin)
-        "Base هر کس", // Persian (Latin)
-        "Base chiếu mọi người", // Vietnamese (Latin)
-        "Base tất cả", // Vietnamese
-        "Base kõikidele", // Estonian
-        "Base hər kəs üçün", // Azerbaijani (Latin)
+        "Base is for everyone",
+        "Base es para todos",
+        "Base est pour tout le monde",
+        "Base ist für alle",
+        "Base 是为所有人准备的",
+        "Base は皆のためです",
+        "Base 는 모두를 위한 것입니다",
+        "Base jest dla wszystkich",
+        "Base для всех",
+        "Base é para todos",
+        "Base è per tutti",
+        "Base للجميع",
+        "Base je za svakoga",
+        "Base is voor iedereen",
+        "Base είναι για όλους",
+        "Base सबके लिए है",
+        "Base për të gjithë",
+        "Base הוא לכולם",
+        "Base для всіх",
+        "Base је за све",
+        "Base dành cho mọi người",
+        "Base je pro všechny",
+        "Base pentru toată lumea",
+        "Base je za vse",
+        "Base hər kəs üçündür",
+        "Base ni kwa kila mtu",
+        "Base барои ҳама аст",
+        "Base е за сите",
+        "Base yra visiems",
+        "Base ir visiem",
+        "Base ke bakeng sa bohle",
+        "Base สำหรับทุกคน",
+        "Base untuk semua orang",
+        "Base é para todos",
+        "Base je za sve",
+        "Base mindenkié",
+        "Base kõigi jaoks",
+        "Base er for alle",
+        "Base fyrir alla",
+        "Base semua",
+        "Base pro každého",
+        "Base mo ĉiuj",
+        "Base هر",
+        "Base mỗi người",
+        "Base tansi",
+        "Base tout moun",
+        "Base hver",
+        "Base cada pessoa",
+        "Base mindenki számára",
+        "Base każda osoba",
+        "Base każdého",
+        "Base varje person",
+        "Base mindenki",
+        "Base هر کس",
+        "Base chiếu mọi người",
+        "Base tất cả",
+        "Base kõikidele",
+        "Base hər kəs üçün",
     ];
 
-    let currentIndex = 0;
     const messageElement = document.getElementById('base-message');
-    let angle = 0;
+    const stageElement = document.getElementById('stage');
+    const measureCanvas = document.createElement('canvas');
+    const measureContext = measureCanvas.getContext('2d');
+
+    const fontFamily = 'Montserrat, sans-serif';
+    const fontWeight = 500;
+    const lineHeight = 1.2;
+    const heightBudget = 0.22;
+    const widthBudget = 0.88;
+
+    let currentIndex = 0;
     let activePhrase = phrases[0];
     let resizeFrame = null;
+    let typeFrame = null;
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -88,45 +97,46 @@ document.addEventListener('DOMContentLoaded', () => {
         return newPhrases;
     }
 
-    function fitMessage(phrase) {
-        const styles = getComputedStyle(messageElement);
-        const maxWidth = messageElement.clientWidth;
-        const padding = parseFloat(styles.getPropertyValue('--message-padding')) || 0;
-        const bodyStyles = getComputedStyle(document.body);
-        const verticalInset =
-            (parseFloat(bodyStyles.paddingTop) || 0) +
-            (parseFloat(bodyStyles.paddingBottom) || 0);
-        const maxHeight = window.innerHeight - verticalInset - (padding * 2);
+    function getBounds() {
+        const rect = stageElement.getBoundingClientRect();
+        return {
+            width: rect.width * widthBudget,
+            height: rect.height * heightBudget,
+        };
+    }
 
+    function measurePhrase(phrase, fontSize) {
+        measureContext.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        const metrics = measureContext.measureText(phrase);
+        const width = metrics.width;
+        const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.78;
+        const descent = metrics.actualBoundingBoxDescent || fontSize * 0.22;
+        const height = (ascent + descent) * lineHeight;
+
+        return { width, height };
+    }
+
+    function fitMessage(phrase) {
+        const { width: maxWidth, height: maxHeight } = getBounds();
         if (maxWidth <= 0 || maxHeight <= 0) {
             return;
         }
 
-        const previousText = messageElement.textContent;
-        messageElement.textContent = phrase;
-
-        let low = 1;
-        let high = Math.max(
-            Math.floor(maxHeight * 0.92),
-            Math.floor(maxWidth / Math.max(phrase.length * 0.3, 1))
-        );
+        let low = 8;
+        let high = Math.floor(Math.min(maxHeight / lineHeight, maxWidth / 3));
 
         while (low < high) {
             const mid = Math.ceil((low + high) / 2);
-            messageElement.style.fontSize = `${mid}px`;
+            const { width, height } = measurePhrase(phrase, mid);
 
-            const fitsWidth = messageElement.scrollWidth <= maxWidth;
-            const fitsHeight = messageElement.scrollHeight <= maxHeight * 0.92;
-
-            if (fitsWidth && fitsHeight) {
+            if (width <= maxWidth && height <= maxHeight) {
                 low = mid;
             } else {
                 high = mid - 1;
             }
         }
 
-        messageElement.style.fontSize = `${Math.max(low, 1)}px`;
-        messageElement.textContent = previousText;
+        messageElement.style.fontSize = `${Math.max(low, 12)}px`;
     }
 
     function scheduleFit() {
@@ -140,27 +150,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateBackground() {
-        angle = (angle + 0.1) % 360;
-        document.body.style.background = `conic-gradient(from ${angle}deg at 50% 50%, #001cf5, #4874f7, #001cf5)`;
-        requestAnimationFrame(updateBackground);
-    }
-
     function writePhrase(phrase, callback) {
         activePhrase = phrase;
         fitMessage(phrase);
 
-        let i = 0;
-        messageElement.textContent = '';
-        const writeInterval = setInterval(() => {
-            if (i < phrase.length) {
-                messageElement.textContent = phrase.slice(0, i + 1);
-                i++;
-            } else {
-                clearInterval(writeInterval);
-                setTimeout(callback, 2000);
+        if (typeFrame !== null) {
+            cancelAnimationFrame(typeFrame);
+        }
+
+        let index = 0;
+        let lastTime = 0;
+        const charDelay = 69;
+
+        function step(timestamp) {
+            if (!lastTime) {
+                lastTime = timestamp;
             }
-        }, 69);
+
+            if (timestamp - lastTime >= charDelay) {
+                index += 1;
+                lastTime = timestamp;
+                messageElement.textContent = phrase.slice(0, index);
+            }
+
+            if (index < phrase.length) {
+                typeFrame = requestAnimationFrame(step);
+                return;
+            }
+
+            typeFrame = null;
+            setTimeout(callback, 2000);
+        }
+
+        messageElement.textContent = '';
+        typeFrame = requestAnimationFrame(step);
     }
 
     function cyclePhrases(newPhrases) {
@@ -172,12 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', scheduleFit);
     window.addEventListener('orientationchange', scheduleFit);
+
     if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', scheduleFit);
+        window.visualViewport.addEventListener('scroll', scheduleFit);
     }
 
     const newPhrases = createPhrasesArray();
     newPhrases.unshift(phrases[0]);
-    updateBackground();
     cyclePhrases(newPhrases);
 });
