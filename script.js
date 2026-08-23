@@ -144,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let deck = [];
     let currentSuffix = '';
     let lockedFontSize = null;
-    let lockedSuffixWidth = null;
     let resizeFrame = null;
     let typeFrame = null;
     let cycling = false;
@@ -207,28 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return widest;
     }
 
-    function widestSuffix(fontSize) {
-        let widest = translations[0];
-        let maxWidth = measureText(widest, fontSize).width;
-
-        for (const suffix of translations) {
-            const width = measureText(suffix, fontSize).width;
-            if (width > maxWidth) {
-                maxWidth = width;
-                widest = suffix;
-            }
-        }
-
-        return { suffix: widest, width: maxWidth };
-    }
-
     function applyLockedLayout() {
-        if (lockedFontSize === null || lockedSuffixWidth === null) {
+        if (lockedFontSize === null) {
             return;
         }
 
         messageElement.style.fontSize = `${lockedFontSize}px`;
-        suffixElement.style.setProperty('--suffix-width', `${Math.ceil(lockedSuffixWidth)}px`);
     }
 
     function lockLayout() {
@@ -253,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         lockedFontSize = Math.max(low, 12);
-        lockedSuffixWidth = widestSuffix(lockedFontSize).width;
         applyLockedLayout();
     }
 

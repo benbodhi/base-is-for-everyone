@@ -74,11 +74,9 @@ body {
 }
 
 #base-message {
-    display: inline-flex;
-    align-items: baseline;
-    justify-content: center;
-    max-width: 100%;
+    width: 100%;
     margin: 0;
+    text-align: center;
     white-space: nowrap;
     line-height: 1.2;
     letter-spacing: -0.015em;
@@ -87,15 +85,9 @@ body {
     text-rendering: geometricPrecision;
 }
 
-#base-word {
-    flex: 0 0 auto;
-}
-
+#base-word,
 #base-suffix {
-    display: inline-block;
-    flex: 0 0 auto;
-    min-width: var(--suffix-width, 0);
-    text-align: left;
+    display: inline;
 }
 
 #link-container {
