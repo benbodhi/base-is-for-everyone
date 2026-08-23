@@ -16,7 +16,13 @@
 <body>
     <div id="background" aria-hidden="true"></div>
     <main id="stage">
-        <div id="base-message"></div>
+        <p id="base-message">
+            <span id="base-word">Base</span>
+            <span id="suffix-slot" aria-live="polite">
+                <span class="suffix-layer is-visible" dir="auto"></span>
+                <span class="suffix-layer" dir="auto"></span>
+            </span>
+        </p>
     </main>
     <script src="script.js"></script>
 </body>
